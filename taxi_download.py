@@ -40,7 +40,7 @@ for y in years:
 
         urls.append(purl)
 
-    if (y > 2009): break;
+    # if (y > 2009): break;
 
 
 
