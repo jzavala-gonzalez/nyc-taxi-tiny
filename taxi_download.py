@@ -16,6 +16,7 @@ months = list(range(1,13))
 
 urls = []
 for y in years:
+    print(y)
     for m in months:
         dpath = os.path.join('nyc-taxi-tiny', f'year={y}', f'month={m}')
         # print(dpath)
@@ -39,7 +40,7 @@ for y in years:
 
         urls.append(purl)
 
-    break
+    if (y > 2009): break;
 
 
 

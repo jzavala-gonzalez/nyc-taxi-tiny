@@ -35,3 +35,24 @@ df = con.fetch_df()
 print(df)
 print(df.columns)
 print()
+
+
+# Create a view of the whole dataset
+# (Basically just shortcut the query to 'nyc_taxi_tiny')
+con.execute(f'''
+CREATE VIEW nyc_taxi_tiny AS
+SELECT *
+FROM parquet_scan({urls});
+''')
+
+
+# Sample from that view
+con.execute(f'''
+SELECT *
+FROM nyc_taxi_tiny
+LIMIT 5;
+''')
+df = con.fetch_df()
+print(df)
+print(df.columns)
+print()
