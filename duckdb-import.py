@@ -10,6 +10,23 @@ manifest_fname = 'fileurls.txt'
 with open(manifest_fname, 'r') as f:
     urls = f.read().splitlines()
 print(urls)
+print()
+
+years = None
+years = ['2017']
+if years:
+    yearstrs = ['year='+y for y in years]
+    urls_filtered = []
+    for u in urls:
+        for ys in yearstrs:
+            if ys in u:
+                urls_filtered.append(u)
+                break
+    urls = urls_filtered
+print("Filtered:")
+print(urls)
+print()
+
 
 
 # Sample a few rows with all the columns of the dataset
@@ -50,6 +67,18 @@ FROM parquet_scan({urls});
 con.execute(f'''
 SELECT *
 FROM nyc_taxi_tiny
+LIMIT 5;
+''')
+df = con.fetch_df()
+print(df)
+print(df.columns)
+print()
+
+# Check non-null
+con.execute(f'''
+SELECT pickup_longitude, pickup_latitude
+FROM nyc_taxi_tiny
+WHERE pickup_longitude IS NOT NULL
 LIMIT 5;
 ''')
 df = con.fetch_df()

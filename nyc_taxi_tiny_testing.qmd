@@ -1,0 +1,102 @@
+---
+title: "dbplyr con NYC Taxi Tiny"
+format: html
+editor: visual
+---
+
+## Fuentes // Sources
+
+Copiado de [este post](https://blog.djnavarro.net/posts/2022-08-23_visualising-a-billion-rows/) escrito por Danielle Navarro // Basically copied from [this post](https://blog.djnavarro.net/posts/2022-08-23_visualising-a-billion-rows/) by Danielle Navarro.
+
+## Import libraries
+
+```{r}
+library(arrow)
+library(dplyr)
+library(tictoc)
+library(tidyr)
+library(ggplot2)
+library("DBI")
+library(dbplyr)
+```
+
+## Cargando los datos // Loading the data
+
+```{r}
+con <- dbConnect(duckdb::duckdb(), dbdir=":memory:")
+dbExecute(con, "INSTALL 'httpfs'; LOAD 'httpfs';")
+```
+
+```{r}
+fileurls <- readLines('fileurls.txt')[1:3]
+fileurls
+```
+
+```{r}
+urls_string <- paste0(
+'[',
+paste(
+  paste0("'", fileurls, "'"),
+  collapse=','),
+']'
+)
+cat(urls_string)
+```
+
+Escribir el query que crea el view // Write the query that creates the view:
+
+```{r}
+create_view_query <- '
+CREATE VIEW nyc_taxi_tiny AS
+SELECT *
+FROM parquet_scan(URLLIST);
+'
+create_view_query <- gsub("URLLIST", urls_string, create_view_query)
+cat(create_view_query)
+```
+
+```{r}
+dbExecute(con, create_view_query)
+```
+
+Correr SQL directamente // Run SQL directly
+
+```{r}
+dbGetQuery(con, "SELECT * FROM nyc_taxi_tiny LIMIT 5;")
+```
+
+```{r}
+tbl(con, 'nyc_taxi_tiny') |> 
+  head(5) |> 
+  show_query()
+```
+
+# SQL usando dbplyr // SQL using dbplyr
+
+Aqui esta el 'show_query' importante // Here is the important 'show_query' call
+
+```{r}
+x0 <- -74.05 # minimum longitude to plot
+y0 <- 40.6   # minimum latitude to plot
+span <- 0.3  # size of the lat/long window to plot
+pixels <- 4000
+
+tic()
+tbl(con, 'nyc_taxi_tiny') |> 
+  filter(
+    !is.na(pickup_longitude),
+    !is.na(pickup_latitude),
+    pickup_longitude > x0,
+    pickup_longitude < x0 + span,
+    pickup_latitude > y0,
+    pickup_latitude < y0 + span
+  ) |>
+  mutate(
+    unit_scaled_x = (pickup_longitude - x0) / span,
+    unit_scaled_y = (pickup_latitude - y0) / span,
+    x = as.integer(round(pixels * unit_scaled_x, 0)), 
+    y = as.integer(round(pixels * unit_scaled_y, 0))
+  ) |>
+  count(x, y, name = "pickup") |> show_query()
+toc()
+```
