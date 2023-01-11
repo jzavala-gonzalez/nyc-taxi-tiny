@@ -8,6 +8,8 @@ editor: visual
 
 Copiado de [este post](https://blog.djnavarro.net/posts/2022-08-23_visualising-a-billion-rows/) escrito por Danielle Navarro // Basically copied from [this post](https://blog.djnavarro.net/posts/2022-08-23_visualising-a-billion-rows/) by Danielle Navarro.
 
+Danielle Navarro. 2022. \"How to Visualise a Billion Rows of Data in R with Apache Arrow.\" August 23, 2022. <https://blog.djnavarro.net/posts/2022-08-23_visualising-a-billion-rows>.
+
 ## Import libraries
 
 ```{r}
